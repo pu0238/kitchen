@@ -1,39 +1,33 @@
 import { Injectable } from '@nestjs/common';
-
-export type User = {
-  id: number;
-  username: string;
-  email: string;
-  password: string;
-};
-
+import { JwtService } from '@nestjs/jwt';
+import { UserService } from 'src/user/user.service';
+import { LogInValidator } from './dto';
 @Injectable()
 export class AuthService {
-  private readonly users: User[] = [
-    {
-      id: 1,
-      username: 'Username',
-      email: 'Email',
-      password: 'Password',
-    },
-  ];
-  private async findOne(username: string): Promise<User | undefined> {
-    return this.users.find((user) => user.username === username);
-  }
-  private async validateUser(username: string, password: string): Promise<any> {
-    const user = await this.findOne(username);
+  constructor(
+    private userService: UserService,
+    private jwtService: JwtService,
+  ) {}
+  async validateUser(usernameOrEmail: string, passwd: string): Promise<any> {
+    const isEmail = this.userService.validateEmail(usernameOrEmail);
+    const user = await this.userService.findOne(usernameOrEmail, isEmail);
 
-    if (user && user.password === password) {
-      return user;
+    if (user && user.password === passwd) {
+      const { password, ...result } = user;
+      return result;
     }
+    return null;
   }
   singIn(): string {
     return 'singIn';
   }
-  logIn(): string {
-    return 'logIn';
+  async logIn(body: LogInValidator): Promise<any>  {
+    const payload = { username: body.username, sub: body.password };
+    return {
+      accessToken: this.jwtService.sign(payload),
+    };
   }
   logOut(): string {
-    return 'logOut xdcxcxc';
+    return 'logOut';
   }
 }
