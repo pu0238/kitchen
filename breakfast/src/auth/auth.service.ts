@@ -1,14 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UserService } from 'src/user/user.service';
-import { LogInValidator } from './dto';
+import { User, UserService } from 'src/user/user.service';
+import { SingInValidator } from './dto';
+import { accessToken } from './interfaces/auth.accessToken';
 @Injectable()
 export class AuthService {
   constructor(
     private userService: UserService,
     private jwtService: JwtService,
   ) {}
-  async validateUser(usernameOrEmail: string, passwd: string): Promise<any> {
+  async validateUser(usernameOrEmail: string, passwd: string): Promise<User | null> {
     const isEmail = this.userService.validateEmail(usernameOrEmail);
     const user = await this.userService.findOne(usernameOrEmail, isEmail);
 
@@ -18,16 +19,13 @@ export class AuthService {
     }
     return null;
   }
-  singIn(): string {
+  async singIn(body: SingInValidator): Promise<string> {
     return 'singIn';
   }
-  async logIn(body: LogInValidator): Promise<any>  {
-    const payload = { username: body.username, sub: body.password };
+  async logIn(user: any): Promise<accessToken>  {
+    const payload = { username: user.username, id: user.id  };
     return {
       accessToken: this.jwtService.sign(payload),
     };
-  }
-  logOut(): string {
-    return 'logOut';
   }
 }
