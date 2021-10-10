@@ -1,0 +1,16 @@
+version: "3"
+services:
+  breakfast-mysql:
+    image: mysql
+    restart: unless-stopped
+    ports: 
+      - 3306:3306
+    env_file: 
+      - breakfast-mysql.env
+  breakfast:
+    image: breakfast
+    restart: unless-stopped
+    ports: 
+      - 3000:3000
+    env_file: 
+      - breakfast.env
