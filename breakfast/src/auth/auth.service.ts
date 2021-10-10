@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
@@ -17,19 +17,24 @@ export class AuthService {
     return re.test(email.toLowerCase());
   }
 
-  async getUserByEmailOrUsername(usernameOrEmail: string): Promise<User | undefined> {
+  async getUserByEmailOrUsername(
+    usernameOrEmail: string,
+  ): Promise<User | undefined> {
     const isEmail = this.validateEmail(usernameOrEmail);
 
     if (isEmail) {
-      const email = usernameOrEmail
+      const email = usernameOrEmail;
       return await this.userService.findOne({ email });
     }
-    const username = usernameOrEmail
+    const username = usernameOrEmail;
     return await this.userService.findOne({ username });
   }
 
-  async validateUser(usernameOrEmail: string, passwd: string): Promise<User | null> {
-    const user = await this.getUserByEmailOrUsername(usernameOrEmail)
+  async validateUser(
+    usernameOrEmail: string,
+    passwd: string,
+  ): Promise<User | null> {
+    const user = await this.getUserByEmailOrUsername(usernameOrEmail);
 
     if (user && user.password === passwd) {
       const { password, ...result } = user;
@@ -38,12 +43,26 @@ export class AuthService {
     return null;
   }
 
-  async singIn(body: SingInValidator): Promise<string> {
-    return 'singIn';
+  async singIn(body: SingInValidator): Promise<accessToken> {
+    const user: User = {
+      username: body.username,
+      email: body.email,
+      password: body.password,
+    };
+
+    if (await this.getUserByEmailOrUsername(user.email)) {
+      throw new ConflictException();
+    }
+    if (await this.getUserByEmailOrUsername(user.username)) {
+      throw new ConflictException();
+    }
+    await this.userService.insert(user)
+    const { password, ...result } = user;
+    return this.logIn(result);
   }
 
-  async logIn(user: any): Promise<accessToken>  {
-    const payload = { username: user.username, id: user.id  };
+  async logIn(user: User): Promise<accessToken> {
+    const payload = { username: user.username, id: user.id };
     return {
       accessToken: this.jwtService.sign(payload),
     };
