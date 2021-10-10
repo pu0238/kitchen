@@ -1,34 +1,29 @@
-import { Injectable } from "@nestjs/common";
-
-export type User = {
-    id: number;
-    username: string;
-    email: string;
-    password?: string;
-  };
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from './user.entity';
 
 @Injectable()
 export class UserService {
-  private readonly users: User[] = [
-    {
-      id: 1,
-      username: "Username",
-      email: "Email@xd.pl",
-      password: "Password",
-    },
-  ];
-  validateEmail(email: string) {
-    const re =
-      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return re.test(email.toLowerCase());
+  constructor(
+    @InjectRepository(User)
+    private usersRepository: Repository<User>,
+  ) {}
+
+  findAll(): Promise<User[]> {
+    return this.usersRepository.find();
   }
-  async findOne(
-    usernameOrEmail: string,
-    isEmail: boolean
-  ): Promise<User | undefined> {
-    if (isEmail) {
-      return this.users.find((user) => user.email === usernameOrEmail);
-    }
-    return this.users.find((user) => user.username === usernameOrEmail);
+
+  findOne(id: any): Promise<User> {
+    return this.usersRepository.findOne(id);
+  }
+
+  s(): Promise<any> {
+    const user: any = {username: "sdsd2", email:"ddddd2", password:"sdsdddd3"}
+    return this.usersRepository.insert(user);
+  }
+
+  async remove(id: string): Promise<void> {
+    await this.usersRepository.delete(id);
   }
 }

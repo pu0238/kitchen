@@ -34,7 +34,7 @@ function getEnv(envName: string): string {
       password: getEnv(`${nodeEnvironment}_DATABASE_PASSWORD`),
       database: getEnv(`${nodeEnvironment}_DATABASE_NAME`),
       entities: [User],
-      synchronize: true,
+      synchronize: nodeEnvironment === "DEVELOPMENT" ? true : false,
     }),
   ],
   controllers: [AppController],
