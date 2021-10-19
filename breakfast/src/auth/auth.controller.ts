@@ -6,33 +6,32 @@ import {
   UseGuards,
   Request,
 } from '@nestjs/common';
-import { UserService } from 'src/user/user.service';
 import { AuthService } from './auth.service';
 import { SingInValidator } from './dto';
 import { JwtAuthGuard } from './guards/jwt.guard';
 import { LocalAuthGuard } from './guards/local.guard';
+import { accessToken } from './interfaces/auth.accessToken';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private readonly userService: UserService,
   ) {}
 
   @Post('singin')
-  async singIn(@Body() body: SingInValidator): Promise<any> {
-    return await this.authService.singIn(body);
+  singIn(@Body() body: SingInValidator): Promise<accessToken> {
+    return this.authService.singIn(body);
   }
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  async logIn(@Request() req): Promise<any> {
-    return await this.authService.logIn(req.user);
+  logIn(@Request() req): Promise<accessToken> {
+    return this.authService.logIn(req.user);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('protected')
-  async protected(@Request() req): Promise<any> {
+  protected(@Request() req): Promise<any> {
     return req.user;
   }
 }

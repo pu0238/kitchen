@@ -1,7 +1,7 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { User } from 'src/user/user.entity';
-import { UserService } from 'src/user/user.service';
+import { User } from '../user/user.entity';
+import { UserService } from '../user/user.service';
 import { SingInValidator } from './dto';
 import { accessToken } from './interfaces/auth.accessToken';
 @Injectable()
@@ -11,7 +11,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  validateEmail(email: string) {
+  validateEmail(email: string): boolean {
     const re =
       /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(email.toLowerCase());
@@ -49,15 +49,16 @@ export class AuthService {
       email: body.email,
       password: body.password,
     };
+    if (
+      (await this.getUserByEmailOrUsername(user.email)) ||
+      (await this.getUserByEmailOrUsername(user.username))
+    ) {
+      throw new ConflictException();
+    }
+    await this.userService.insert(user);
 
-    if (await this.getUserByEmailOrUsername(user.email)) {
-      throw new ConflictException();
-    }
-    if (await this.getUserByEmailOrUsername(user.username)) {
-      throw new ConflictException();
-    }
-    await this.userService.insert(user)
     const { password, ...result } = user;
+
     return this.logIn(result);
   }
 

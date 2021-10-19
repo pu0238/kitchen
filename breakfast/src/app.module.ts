@@ -6,8 +6,8 @@ import { UserService } from './user/user.service';
 import { UserModule } from './user/user.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import * as dotenv from 'dotenv';
 import { User } from './user/user.entity';
+import * as dotenv from 'dotenv';
 
 dotenv.config();
 const nodeEnvironment = getEnv('NODE_ENV').toUpperCase();
