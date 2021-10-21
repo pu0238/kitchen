@@ -1,4 +1,4 @@
-import { UnauthorizedException } from "@nestjs/common";
+import { ConflictException, UnauthorizedException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 import { AuthService } from "../auth.service";
 import { mockAuthService } from "../test/mock.auth.service";
@@ -23,13 +23,19 @@ describe('LocalStrategy', () => {
 
     it('should validate user', () => {
         const username = 'username'
-        const password = 'password'
+        const password = 'P@ssw0rd'
         expect(localStrategy.validate(username, password)).resolves.toEqual(expect.any(Object));
     });
 
     it('should not validate user', () => {
         const username = 'username'
         const password = 'wrongPassword'
+        expect(localStrategy.validate(username, password)).rejects.toThrow(ConflictException);
+    });
+
+    it('should not validate user', () => {
+        const username = 'username'
+        const password = 'P@ssw0rddsdsd'
         expect(localStrategy.validate(username, password)).rejects.toThrow(UnauthorizedException);
     });
 })

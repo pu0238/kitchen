@@ -11,8 +11,11 @@ export class User {
     @Column({unique: true})
     email: string;
 
-    @Column({ type: "varchar", length: 32 })
+    @Column({ type: "varchar", length: 64 })
     password?: string;
+
+    @Column({ type: "varchar", length: 32 })
+    salt?: string;
 
     @CreateDateColumn()    
     createdDate?: Date;
