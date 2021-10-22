@@ -52,7 +52,7 @@ export class AuthService {
     const user = await this.getUserByEmailOrUsername(usernameOrEmail);
     if (!user) return null;
     if (user.password === this.saltAndHash(passwd, user.salt)) {
-      const { password, ...result } = user;
+      const { password, salt, ...result } = user;
       return result;
     }
     return null;
@@ -83,7 +83,7 @@ export class AuthService {
 
     await this.userService.insert(user);
 
-    const { password, ...result } = user;
+    const { password, salt, ...result } = user;
     return this.logIn(result);
   }
 
